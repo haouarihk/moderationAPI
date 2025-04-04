@@ -2,22 +2,50 @@ import json
 import torch
 import uuid
 from transformers import BertTokenizer, BertForSequenceClassification
-from fastapi import FastAPI
+from fastapi import FastAPI, HTTPException
 from pydantic import BaseModel
 import time
-from typing import Dict, List
+from typing import Dict, List, Optional
 
 # Initialize FastAPI app
 app = FastAPI()  # This line must be here
 
-# Load the model and tokenizer once at the start of the app
-model_name = "ifmain/ModerationBERT-En-02"
-tokenizer = BertTokenizer.from_pretrained(model_name)
-model = BertForSequenceClassification.from_pretrained(model_name, num_labels=18)
-
-# Device configuration
+# Model configuration
+DEFAULT_MODEL_NAME = "ifmain/ModerationBERT-En-02"
 device = torch.device('cuda' if torch.cuda.is_available() else 'cpu')
-model.to(device)
+
+# Model cache
+model_cache = {}
+current_model_name = DEFAULT_MODEL_NAME
+
+def load_model(model_name: str) -> None:
+    global current_model_name
+    if model_name in model_cache:
+        # Model already loaded, just update current model name
+        current_model_name = model_name
+        return
+    
+    try:
+        if "bert" not in model_name.lower():
+            return
+        
+        # Load new model and add to cache
+        tokenizer = BertTokenizer.from_pretrained(model_name)
+        model = BertForSequenceClassification.from_pretrained(model_name, num_labels=18)
+        model.to(device)
+        model_cache[model_name] = (tokenizer, model)
+        current_model_name = model_name
+    except Exception as e:
+        raise HTTPException(
+            status_code=400,
+            detail=f"Failed to load model {model_name}. Please ensure it's a valid BERT model. Error: {str(e)}"
+        )
+
+# Load default model at startup
+load_model(DEFAULT_MODEL_NAME)
+
+def get_current_model():
+    return model_cache[current_model_name]
 
 # Define categories and their OpenAI mappings
 category_mappings = {
@@ -38,7 +66,8 @@ category_mappings = {
 threshold = 0.5
 
 class ModerationInput(BaseModel):
-    input: List[str]
+    input: str | List[str]
+    model: str | None = None
 
 class Categories(BaseModel):
     sexual: bool
@@ -77,6 +106,7 @@ class ModerationResponse(BaseModel):
     results: List[ModerationResult]
 
 def predict(text: str):
+    tokenizer, model = get_current_model()
     encoding = tokenizer.encode_plus(
         text,
         add_special_tokens=True,
@@ -144,15 +174,22 @@ async def moderate_text(request: ModerationInput):
     # Generate a unique ID for the request
     request_id = f"modr-{str(uuid.uuid4())[:8]}"
     
+    # Load custom model if provided and different from current
+    if request.model and request.model != current_model_name:
+        load_model(request.model)
+    
+    # Convert single string input to list for consistent processing
+    input_texts = [request.input] if isinstance(request.input, str) else request.input
+    
     # Process each input text
     results = []
-    for text in request.input:
+    for text in input_texts:
         predictions = predict(text)
         result = process_predictions(predictions)
         results.append(result)
     
     return ModerationResponse(
         id=request_id,
-        model="ModerationBERT-En-02",
+        model=current_model_name,  # Return the actual model name being used
         results=results
     )

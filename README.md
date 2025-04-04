@@ -15,6 +15,24 @@ A FastAPI-based content moderation service using BERT for text classification. T
 - Docker containerization with both CPU and GPU support
 - GitHub Actions CI/CD pipeline
 
+## Model Information
+
+This service uses the `ifmain/ModerationBERT-En-02` model, which is a fine-tuned BERT model specifically designed for content moderation. The model can detect and classify content across 11 different categories:
+
+- Harassment
+- Harassment/Threatening
+- Hate
+- Hate/Threatening
+- Self-harm
+- Self-harm/Instructions
+- Self-harm/Intent
+- Sexual
+- Sexual/Minors
+- Violence
+- Violence/Graphic
+
+The model outputs both binary classifications (flagged/not flagged) and confidence scores for each category, allowing for fine-grained content analysis.
+
 ## Quick Start with Docker Compose
 
 ### CPU only
@@ -116,11 +134,11 @@ Analyzes text content for harmful content.
 If you prefer using Docker directly:
 
 ```bash
-# Pull the image
-docker pull ghcr.io/your-username/moderationAPI:main-cpu
+# Pull the CPU image
+docker pull ghcr.io/haouarihk/moderationAPI:latest-cpu
 
 # Run the container
-docker run -p 8000:8000 ghcr.io/your-username/moderationAPI:main-cpu
+docker run -p 8000:8000 ghcr.io/haouarihk/moderationAPI:latest-cpu
 ```
 
 ### Local Development
