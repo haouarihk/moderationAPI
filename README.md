@@ -41,7 +41,7 @@ version: '3.8'
 
 services:
   moderation-api:
-    image: ghcr.io/haouarihk/moderationAPI:main-cpu
+    image: ghcr.io/haouarihk/moderationapi:main-cpu
     ports:
       - 8000:8000
     restart: unless-stopped
@@ -53,7 +53,7 @@ version: '3.8'
 
 services:
   moderation-api:
-    image: ghcr.io/haouarihk/moderationAPI:main
+    image: ghcr.io/haouarihk/moderationapi:main
     ports:
       - 8000:8000
     deploy:
@@ -135,10 +135,10 @@ If you prefer using Docker directly:
 
 ```bash
 # Pull the CPU image
-docker pull ghcr.io/haouarihk/moderationAPI:latest-cpu
+docker pull ghcr.io/haouarihk/moderationapi:latest-cpu
 
 # Run the container
-docker run -p 8000:8000 ghcr.io/haouarihk/moderationAPI:latest-cpu
+docker run -p 8000:8000 ghcr.io/haouarihk/moderationapi:latest-cpu
 ```
 
 ### Local Development
