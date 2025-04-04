@@ -12,7 +12,7 @@ A FastAPI-based content moderation service using BERT for text classification. T
   - Sexual content
   - Violence
 - FastAPI-based REST API
-- Docker containerization
+- Docker containerization with both CPU and GPU support
 - GitHub Actions CI/CD pipeline
 
 ## Quick Start with Docker Compose
@@ -23,7 +23,7 @@ version: '3.8'
 
 services:
   moderation-api:
-    image: ghcr.io/haouarihk/moderationAPI:latest
+    image: ghcr.io/haouarihk/moderationAPI:latest-cpu
     ports:
       - 8000:8000
     restart: unless-stopped
@@ -116,11 +116,11 @@ Analyzes text content for harmful content.
 If you prefer using Docker directly:
 
 ```bash
-# Pull the image
-docker pull ghcr.io/your-username/moderationAPI:latest
+# Pull the CPU image
+docker pull ghcr.io/haouarihk/moderationAPI:latest-cpu
 
 # Run the container
-docker run -p 8000:8000 ghcr.io/your-username/moderationAPI:latest
+docker run -p 8000:8000 ghcr.io/haouarihk/moderationAPI:latest-cpu
 ```
 
 ### Local Development
@@ -133,7 +133,7 @@ For local development, you'll need:
 
 1. Clone the repository:
 ```bash
-git clone https://github.com/your-username/moderationAPI.git
+git clone https://github.com/haouarihk/moderationAPI.git
 cd moderationAPI
 ```
 
@@ -153,13 +153,22 @@ No environment variables are required for basic operation.
 
 ## CI/CD
 
-This project uses GitHub Actions for continuous integration and deployment. On every push to the main branch:
+This project uses separate GitHub Actions workflows for CPU and GPU images:
 
-1. The Docker image is built
-2. The image is pushed to GitHub Container Registry (GHCR)
-3. The image is tagged with:
-   - `latest` for the most recent push
-   - Commit SHA for specific versions
+1. GPU Image Workflow (`.github/workflows/docker-build-gpu.yml`):
+   - Builds and pushes the GPU-optimized image
+   - Tagged as `latest`
+   - Uses CUDA base image
+
+2. CPU Image Workflow (`.github/workflows/docker-build-cpu.yml`):
+   - Builds and pushes the CPU-optimized image
+   - Tagged as `latest-cpu`
+   - Uses slim base image
+
+Both workflows:
+- Trigger on pushes to the main branch
+- Push to GitHub Container Registry (GHCR)
+- Include commit SHA tags for specific versions
 
 ## License
 
