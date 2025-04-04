@@ -23,7 +23,7 @@ version: '3.8'
 
 services:
   moderation-api:
-    image: ghcr.io/haouarihk/moderationAPI:latest-cpu
+    image: ghcr.io/haouarihk/moderationAPI:main-cpu
     ports:
       - 8000:8000
     restart: unless-stopped
@@ -35,7 +35,7 @@ version: '3.8'
 
 services:
   moderation-api:
-    image: ghcr.io/haouarihk/moderationAPI:latest
+    image: ghcr.io/haouarihk/moderationAPI:main
     ports:
       - 8000:8000
     deploy:
@@ -116,11 +116,11 @@ Analyzes text content for harmful content.
 If you prefer using Docker directly:
 
 ```bash
-# Pull the CPU image
-docker pull ghcr.io/haouarihk/moderationAPI:latest-cpu
+# Pull the image
+docker pull ghcr.io/your-username/moderationAPI:main-cpu
 
 # Run the container
-docker run -p 8000:8000 ghcr.io/haouarihk/moderationAPI:latest-cpu
+docker run -p 8000:8000 ghcr.io/your-username/moderationAPI:main-cpu
 ```
 
 ### Local Development
