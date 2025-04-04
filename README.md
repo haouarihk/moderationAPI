@@ -23,7 +23,7 @@ version: '3.8'
 
 services:
   moderation-api:
-    image: ghcr.io/haouarihk/moderationAPI:latest
+    image: ghcr.io/haouarihk/moderationAPI:main
     ports:
       - 8000:8000
     restart: unless-stopped
@@ -35,7 +35,7 @@ version: '3.8'
 
 services:
   moderation-api:
-    image: ghcr.io/haouarihk/moderationAPI:latest
+    image: ghcr.io/haouarihk/moderationAPI:main
     ports:
       - 8000:8000
     deploy:
@@ -117,10 +117,10 @@ If you prefer using Docker directly:
 
 ```bash
 # Pull the image
-docker pull ghcr.io/your-username/moderationAPI:latest
+docker pull ghcr.io/your-username/moderationAPI:main
 
 # Run the container
-docker run -p 8000:8000 ghcr.io/your-username/moderationAPI:latest
+docker run -p 8000:8000 ghcr.io/your-username/moderationAPI:main
 ```
 
 ### Local Development
@@ -158,7 +158,7 @@ This project uses GitHub Actions for continuous integration and deployment. On e
 1. The Docker image is built
 2. The image is pushed to GitHub Container Registry (GHCR)
 3. The image is tagged with:
-   - `latest` for the most recent push
+   - `main` for the most recent push
    - Commit SHA for specific versions
 
 ## License
