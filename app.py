@@ -25,12 +25,6 @@ def get_least_used_gpu():
     if num_gpus == 0:
         return torch.device('cpu')
     
-    # Add startup delay to prevent all workers from starting simultaneously
-    startup_delay = random.uniform(1, 30)  # Random delay between 1-30 seconds
-    worker_count = os.environ.get('WEB_CONCURRENCY', 'unknown')
-    print(f"Worker startup delay: {startup_delay:.2f} seconds (WEB_CONCURRENCY: {worker_count})")
-    time.sleep(startup_delay)
-    
     # Find GPU with lowest memory usage
     min_memory = float('inf')
     selected_gpu = 0
