@@ -1,18 +1,64 @@
 import json
 import torch
 import uuid
+import os
 from transformers import BertTokenizer, BertForSequenceClassification
 from fastapi import FastAPI, HTTPException
 from pydantic import BaseModel
 import time
 from typing import Dict, List, Optional
+import random
 
 # Initialize FastAPI app
 app = FastAPI()  # This line must be here
 
 # Model configuration
 DEFAULT_MODEL_NAME = "ifmain/ModerationBERT-En-02"
-device = torch.device('cuda' if torch.cuda.is_available() else 'cpu')
+
+def get_least_used_gpu():
+    """Find the GPU with the lowest memory usage."""
+    if not torch.cuda.is_available():
+        return torch.device('cpu')
+    
+    # Get number of available GPUs
+    num_gpus = torch.cuda.device_count()
+    if num_gpus == 0:
+        return torch.device('cpu')
+    
+    # Add startup delay to prevent all workers from starting simultaneously
+    startup_delay = random.uniform(1, 30)  # Random delay between 1-30 seconds
+    worker_count = os.environ.get('WEB_CONCURRENCY', 'unknown')
+    print(f"Worker startup delay: {startup_delay:.2f} seconds (WEB_CONCURRENCY: {worker_count})")
+    time.sleep(startup_delay)
+    
+    # Find GPU with lowest memory usage
+    min_memory = float('inf')
+    selected_gpu = 0
+    
+    for gpu_id in range(num_gpus):
+        try:
+            # Get memory info for this GPU
+            memory_allocated = torch.cuda.memory_allocated(gpu_id)
+            memory_reserved = torch.cuda.memory_reserved(gpu_id)
+            total_memory = torch.cuda.get_device_properties(gpu_id).total_memory
+            
+            # Calculate memory usage percentage
+            memory_usage = (memory_allocated + memory_reserved) / total_memory
+            
+            if memory_usage < min_memory:
+                min_memory = memory_usage
+                selected_gpu = gpu_id
+                
+        except Exception as e:
+            print(f"Error checking GPU {gpu_id}: {e}")
+            continue
+    
+    device = torch.device(f'cuda:{selected_gpu}')
+    print(f"Selected GPU {selected_gpu} with {min_memory:.2%} memory usage")
+    return device
+
+# Select device (least used GPU if CUDA available, otherwise CPU)
+device = get_least_used_gpu()
 
 # Print device info
 print(f"Using device: {device} ({'GPU' if device.type == 'cuda' else 'CPU'})")
