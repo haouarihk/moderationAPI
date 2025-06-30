@@ -63,8 +63,6 @@ services:
             - driver: nvidia
               count: all
               capabilities: [gpu]
-    environment:
-      - CUDA_VISIBLE_DEVICES=all
     restart: unless-stopped
 ```
 
