@@ -14,6 +14,9 @@ app = FastAPI()  # This line must be here
 DEFAULT_MODEL_NAME = "ifmain/ModerationBERT-En-02"
 device = torch.device('cuda' if torch.cuda.is_available() else 'cpu')
 
+# Print device info
+print(f"Using device: {device} ({'GPU' if device.type == 'cuda' else 'CPU'})")
+
 # Model cache
 model_cache = {}
 current_model_name = DEFAULT_MODEL_NAME
